@@ -1584,7 +1584,7 @@ func (ts *Tester) down() (err error) {
 
 	var errs []string
 
-	if ts.cfg.SkipDeleteClusterAndNodes {
+	if ts.cfg.SkipDeleteClusterAndNodes || ts.cfg.SkipDeleteCluster {
 		fmt.Fprintf(ts.logWriter, ts.color("\n\n[yellow]*********************************\n"))
 		fmt.Fprintf(ts.logWriter, ts.color("[light_yellow]SKIP [light_blue]deleteKeyPair [default](SkipDeleteClusterAndNodes 'true', %q)\n"), ts.cfg.ConfigPath)
 	} else {
@@ -1611,6 +1611,22 @@ func (ts *Tester) down() (err error) {
 	if ts.cfg.SkipDeleteClusterAndNodes {
 		fmt.Fprintf(ts.logWriter, ts.color("\n\n[yellow]*********************************\n"))
 		fmt.Fprintf(ts.logWriter, ts.color("[light_yellow]SKIP [light_blue]cluster/nodes.Delete [default](SkipDeleteClusterAndNodes 'true', %q)\n"), ts.cfg.ConfigPath)
+	} else if ts.cfg.SkipDeleteCluster {
+		waitDur := 2 * time.Minute
+		ts.lg.Info("sleeping after deleting LB", zap.Duration("wait", waitDur))
+		time.Sleep(waitDur)
+		if ts.cfg.IsEnabledAddOnNodeGroups() && ts.ngTester != nil {
+			fmt.Fprintf(ts.logWriter, ts.color("\n\n[yellow]*********************************\n"))
+			fmt.Fprintf(ts.logWriter, ts.color("[light_blue]ngTester.Delete [default](%q)\n"), ts.cfg.ConfigPath)
+			if err := ts.ngTester.Delete(); err != nil {
+				ts.lg.Warn("failed ngTester.Delete", zap.Error(err))
+				errs = append(errs, err.Error())
+			}
+
+			waitDur := 10 * time.Second
+			ts.lg.Info("sleeping before cluster deletion", zap.Duration("wait", waitDur))
+			time.Sleep(waitDur)
+		}
 	} else {
 		// NOTE(jaypipes): Wait for a bit here because we asked Kubernetes to
 		// delete the NLB hello world and ALB2048 Deployment/Service above, and

@@ -136,6 +136,10 @@ type Config struct {
 	// All node groups and managed node groups are kept.
 	// Use this to use existing clusters to create/delete add-ons.
 	SkipDeleteClusterAndNodes bool `json:"skip-delete-cluster-and-nodes"`
+	// SkipDeleteCluster is true to skip EKS "cluster" deletion
+	// The node group after EKS "cluster" creation will be deleted.
+	// Unmanaged node group supported only
+	SkipDeleteCluster bool `json:"skip-delete-cluster"`
 
 	// Parameters defines EKS "cluster" creation parameters.
 	// It's ok to leave any parameters empty.
@@ -830,6 +834,7 @@ func NewDefault() *Config {
 		CWNamespace: "aws-k8s-tester-eks",
 
 		SkipDeleteClusterAndNodes: false,
+		SkipDeleteCluster:         false,
 		Parameters:                getDefaultParameters(),
 
 		RemoteAccessKeyCreate: true,
@@ -1131,7 +1136,9 @@ func (cfg *Config) validateConfig() error {
 	}
 	regions := partition.Regions()
 	if _, ok := regions[cfg.Region]; !ok {
-		return fmt.Errorf("region %q for partition %q not found in %+v", cfg.Region, cfg.Partition, regions)
+		if cfg.Region != "ap-northeast-3" {
+			return fmt.Errorf("region %q for partition %q not found in %+v", cfg.Region, cfg.Partition, regions)
+		}
 	}
 
 	_, cerr := terminal.IsColor()

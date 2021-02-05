@@ -83,6 +83,8 @@ spec:
 
 	os.Setenv("AWS_K8S_TESTER_EKS_SKIP_DELETE_CLUSTER_AND_NODES", "true")
 	defer os.Unsetenv("AWS_K8S_TESTER_EKS_SKIP_DELETE_CLUSTER_AND_NODES")
+	os.Setenv("AWS_K8S_TESTER_EKS_SKIP_DELETE_CLUSTER", "true")
+	defer os.Unsetenv("AWS_K8S_TESTER_EKS_SKIP_DELETE_CLUSTER")
 	os.Setenv("AWS_K8S_TESTER_EKS_PARAMETERS_VPC_CREATE", "false")
 	defer os.Unsetenv("AWS_K8S_TESTER_EKS_PARAMETERS_VPC_CREATE")
 	os.Setenv("AWS_K8S_TESTER_EKS_PARAMETERS_VPC_ID", "vpc-id")
@@ -673,6 +675,9 @@ spec:
 
 	if !cfg.SkipDeleteClusterAndNodes {
 		t.Fatalf("unexpected SkipDeleteClusterAndNodes %v", cfg.SkipDeleteClusterAndNodes)
+	}
+	if !cfg.SkipDeleteCluster {
+		t.Fatalf("unexpected SkipDeleteCluster %v", cfg.SkipDeleteCluster)
 	}
 
 	if cfg.Parameters.VPCCreate {
