@@ -22,6 +22,7 @@ import (
 
 var (
 	stresserKubeConfigPath string
+	stresserLogDir         string
 
 	stresserPartition    string
 	stresserRegion       string
@@ -68,6 +69,7 @@ func newCreateStresser() *cobra.Command {
 	cmd.PersistentFlags().DurationVar(&stresserDuration, "duration", 5*time.Minute, "duration to run cluster loader")
 	cmd.PersistentFlags().StringVar(&stresserNamespaceWrite, "namespace-write", "default", "namespaces to send writes")
 	cmd.PersistentFlags().StringSliceVar(&stresserNamespacesRead, "namespaces-read", []string{"default"}, "namespaces to send reads")
+	cmd.PersistentFlags().StringVar(&stresserLogDir, "log-dir", "/var/log", "log directory")
 
 	cmd.PersistentFlags().StringVar(&stresserRequestsRawWritesJSONS3Dir, "requests-raw-writes-json-s3-dir", "", "s3 directory prefix to upload")
 	cmd.PersistentFlags().StringVar(&stresserRequestsSummaryWritesJSONS3Dir, "requests-summary-writes-json-s3-dir", "", "s3 directory prefix to upload")
@@ -92,11 +94,11 @@ func createStresserFunc(cmd *cobra.Command, args []string) {
 	// remove this sleep...
 	time.Sleep(3 * time.Second)
 
-	if err := os.MkdirAll("/var/log", 0700); err != nil {
+	if err := os.MkdirAll(stresserLogDir, 0700); err != nil {
 		fmt.Fprintf(os.Stderr, "failed to create dir %v\n", err)
 		os.Exit(1)
 	}
-	if err := fileutil.IsDirWriteable("/var/log"); err != nil {
+	if err := fileutil.IsDirWriteable(stresserLogDir); err != nil {
 		fmt.Fprintf(os.Stderr, "failed to write dir %v\n", err)
 		os.Exit(1)
 	}
