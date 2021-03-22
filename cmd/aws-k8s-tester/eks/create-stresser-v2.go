@@ -31,15 +31,18 @@ func newCreateStresserV2() *cobra.Command {
 		Short: "Creates stresser v2",
 		Run:   createStresserFuncV2,
 	}
+	cmd.PersistentFlags().StringVar(&cfg.kubeconfig, "kubeconfig", "", "kubeconfig file path to interact with apiserver")
 	cmd.PersistentFlags().IntVar(&cfg.N, "number", 5, "number of go routines")
 	cmd.PersistentFlags().DurationVar(&cfg.duration, "duration", 10*time.Minute, "duration of the simulation")
 	cmd.PersistentFlags().IntVar(&cfg.objectSize, "object-size", 8, "object size, by default 8 bytes")
 	cmd.PersistentFlags().IntVar(&cfg.secrets, "secrets", 10, "secret object in default namespace, no more than 500")
 	cmd.PersistentFlags().StringVar(&cfg.busyboxImage, "busybox-image", "", "busy box ecr image uri")
+
 	return cmd
 }
 
 type stresser2 struct {
+	kubeconfig   string
 	N            int
 	duration     time.Duration
 	objectSize   int
